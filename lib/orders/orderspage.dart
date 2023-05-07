@@ -1,6 +1,7 @@
+import 'package:collectar_admin/orders/order/order_page.dart';
 import 'package:collectar_admin/orders/orders_controller.dart';
 import 'package:collectar_admin/orders/orders_model.dart';
-import 'package:data_table_2/data_table_2.dart';
+import 'package:collectar_admin/widgets/orderscard.dart';
 import 'package:firedart/firestore/models.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -10,8 +11,8 @@ import 'package:ionicons/ionicons.dart';
 import '../firebase/firestore_db.dart';
 import '../theme/appcolors.dart';
 import '../theme/fonts.dart';
-import '../widgets/widgets.dart';
-import 'package:timeago/timeago.dart' as timeago;
+
+import 'order/order_controller.dart';
 
 class OrdersPage extends StatelessWidget {
   const OrdersPage({super.key});
@@ -20,110 +21,126 @@ class OrdersPage extends StatelessWidget {
   Widget build(BuildContext context) {
     ScrollController scrollController = ScrollController();
     final controller = Get.put(OrdersController());
+    final orderController = Get.put(OrderController());
     return Stack(children: [
       SingleChildScrollView(
         controller: scrollController,
         child: Column(
           children: [
             SizedBox(
-              height: 200.h,
+              height: 250.h,
             ),
-            StreamBuilder<List<Document>>(
-                stream: FirestoreDB.orderStream(),
-                builder: (context, AsyncSnapshot<List<Document>> snapshot) {
-                  var data = snapshot.data;
+            Row(
+              children: [
+                Container(
+                  alignment: Alignment.centerLeft,
+                  height: 90.h,
+                  width: 1200.w,
+                  child: GetBuilder<OrdersController>(
+                      builder: (controller) => ListView.builder(
+                          padding: EdgeInsets.symmetric(horizontal: 50.w),
+                          itemCount: controller.orderByList.length,
+                          physics: NeverScrollableScrollPhysics(),
+                          scrollDirection: Axis.horizontal,
+                          itemBuilder: (context, index) {
+                            return GestureDetector(
+                              onTap: () {
+                                controller.selectedIndex(index);
+                                controller.update();
+                              },
+                              child: Container(
+                                margin: EdgeInsets.symmetric(horizontal: 30.w),
+                                alignment: Alignment.center,
+                                width: 300.w,
+                                height: 55.h,
+                                decoration: BoxDecoration(
+                                    color:
+                                        controller.selectedIndex.value == index
+                                            ? AppColors.primary
+                                            : AppColors.title,
+                                    borderRadius: BorderRadius.circular(15.r)),
+                                child: Text(
+                                  controller.orderByList[index],
+                                  style: MediumHeaderStyle(
+                                      color: Colors.white, fontSize: 30.sp),
+                                ),
+                              ),
+                            );
+                          })),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                      color: AppColors.darken(AppColors.background),
+                      borderRadius: BorderRadius.circular(15.r)),
+                  child: Obx(() => IconButton(
+                      onPressed: controller.switchOrder,
+                      icon: Icon(
+                        controller.isDescending.isTrue
+                            ? Ionicons.chevron_down
+                            : Ionicons.chevron_up,
+                        color: AppColors.secondary,
+                      ))),
+                )
+              ],
+            ),
+            SizedBox(
+              height: 50.h,
+            ),
+            GetBuilder<OrdersController>(
+              builder: (controller) {
+                return StreamBuilder<List<Document>>(
+                  stream: FirestoreDB.orderStream(
+                      orderBy: controller
+                          .orderBySelection[controller.selectedIndex.value],
+                      descending: controller.isDescending.value),
+                  builder: (context, AsyncSnapshot<List<Document>> snapshot) {
+                    var data = snapshot.data;
 
-                  if (data == null) {
-                    return Center(
+                    if (data == null) {
+                      return Center(
                         heightFactor: 15,
                         child: CircularProgressIndicator(
                           color: AppColors.primary,
-                        ));
-                  } else {
-                    var datalength = data.length;
-                    if (datalength == 0) {
-                      return const Center(
-                        child: Text('No data found'),
+                        ),
                       );
                     } else {
-                      List<Orders> orderList =
+                      final orderList =
                           data.map((e) => Orders.fromJson(e.map)).toList();
                       return AnimatedSize(
-                        duration: Duration(milliseconds: 500),
+                        duration: const Duration(milliseconds: 500),
                         child: Padding(
-                            padding: EdgeInsets.only(
-                                left: 50.w, right: 50.w, bottom: 50.h),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(30.r)),
-                              height: 0.85.sh,
-                              child: DataTable2(
-                                columnSpacing: 0,
-                                horizontalMargin: 10,
-                                minWidth: 150.w,
-                                columns: [
-                                  DataColumn(label: Text('OrderID')),
-                                  DataColumn(label: Text('Status')),
-                                  DataColumn(label: Text('Name')),
-                                  DataColumn(label: Text('Date')),
-                                ],
-                                rows: orderList
-                                    .map((e) => DataRow(
-                                            onSelectChanged: (selected) {
-                                              if (selected!) {
-                                                print(e.orderID);
-                                                controller.onTap();
-                                              }
-                                            },
-                                            cells: [
-                                              DataCell(Text(e.orderID)),
-                                              DataCell(Container(
-                                                  width: 200.w,
-                                                  height: 50.h,
-                                                  decoration: BoxDecoration(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              10.r),
-                                                      border: Border.all(
-                                                          width: 1.0,
-                                                          color: AppColors
-                                                              .background)),
-                                                  child: Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .center,
-                                                      children: [
-                                                        Container(
-                                                          height: 20.r,
-                                                          width: 20.r,
-                                                          decoration:
-                                                              BoxDecoration(
-                                                            color:
-                                                                getStatusColor(
-                                                                    e),
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        10.r),
-                                                          ),
-                                                        ),
-                                                        SizedBox(
-                                                          width: 20.w,
-                                                        ),
-                                                        Text(getStatusType(e))
-                                                      ]))),
-                                              DataCell(Text(e.name)),
-                                              DataCell(
-                                                  Text(timeago.format(e.date))),
-                                            ]))
-                                    .toList(),
-                              ),
-                            )),
+                          padding: const EdgeInsets.only(
+                            left: 50.0,
+                            right: 50.0,
+                            bottom: 50.0,
+                          ),
+                          child: ListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: data.length,
+                            itemBuilder: (context, index) {
+                              return Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 10.0),
+                                child: OrdersCard(
+                                  orders: orderList[index],
+                                  onTap: () {
+                                    controller.mainScreenController
+                                        .onCardPressed(OrderPage());
+                                    orderController.assignOrder(
+                                        orderList[index], data[index].id);
+                                  },
+                                ),
+                              );
+                            },
+                          ),
+                        ),
                       );
                     }
-                  }
-                }),
+                  },
+                );
+              },
+            )
           ],
         ),
       ),

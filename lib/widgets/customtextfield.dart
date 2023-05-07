@@ -5,17 +5,16 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../theme/appcolors.dart';
 
-TextFormField textField(
-  TextEditingController textController, {
-  String? hint,
-  TextInputType? textInputType,
-  TextStyle? style,
-  int? maxLines,
-  Widget? icon,
-  Widget? suffix,
-  TextAlign? textAlign,
-  bool? enabled,
-}) {
+TextFormField textField(TextEditingController textController,
+    {String? hint,
+    TextInputType? textInputType,
+    TextStyle? style,
+    int? maxLines,
+    Widget? icon,
+    Widget? suffix,
+    TextAlign? textAlign,
+    bool? enabled,
+    String? errorText}) {
   return TextFormField(
     keyboardType: textInputType ?? TextInputType.name,
     style: style ?? RegularHeaderStyle(),
@@ -26,6 +25,8 @@ TextFormField textField(
     maxLines: maxLines ?? 1,
     decoration: InputDecoration(
       label: icon,
+      errorText: errorText,
+      errorStyle: MediumHeaderStyle(color: Colors.red),
       suffix: suffix,
       fillColor: enabled == true || enabled == null
           ? Colors.white
@@ -48,16 +49,15 @@ TextFormField textField(
   );
 }
 
-TextFormField textNumField(
-  TextEditingController textController, {
-  String? hint,
-  TextInputType? textInputType,
-  int? maxLines,
-  Widget? icon,
-  Widget? suffix,
-  TextAlign? textAlign,
-  bool? enabled,
-}) {
+TextFormField textNumField(TextEditingController textController,
+    {String? hint,
+    TextInputType? textInputType,
+    int? maxLines,
+    Widget? icon,
+    Widget? suffix,
+    TextAlign? textAlign,
+    bool? enabled,
+    String? errorText}) {
   return TextFormField(
     keyboardType: textInputType,
     textAlign: textAlign ?? TextAlign.start,
@@ -75,6 +75,8 @@ TextFormField textNumField(
               ],
     decoration: InputDecoration(
       label: icon,
+      errorText: errorText,
+      errorStyle: MediumHeaderStyle(color: Colors.red),
       suffix: suffix,
       fillColor: enabled == true || enabled == null
           ? Colors.white

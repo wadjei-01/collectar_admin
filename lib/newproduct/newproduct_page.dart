@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:collectar_admin/firebase/cloudstorage.dart';
 import 'package:collectar_admin/newproduct/newproduct_controller.dart';
 import 'package:collectar_admin/theme/appcolors.dart';
 import 'package:collectar_admin/theme/fonts.dart';
@@ -19,7 +20,7 @@ import 'package:ionicons/ionicons.dart';
 import 'package:multi_select_flutter/chip_display/multi_select_chip_display.dart';
 import 'package:multi_select_flutter/chip_field/multi_select_chip_field.dart';
 import 'package:multi_select_flutter/util/multi_select_item.dart';
-import 'package:path/path.dart';
+import 'package:path/path.dart' as p;
 
 import '../categories/categories_model.dart';
 
@@ -109,16 +110,14 @@ class NewProductPage extends StatelessWidget {
                             SizedBox(
                               height: 20.h,
                             ),
-                            Obx(() {
-                              return textNumField(controller.productDiscount,
-                                  textAlign: TextAlign.end,
-                                  icon: Text(
-                                    "%",
-                                    style: MediumHeaderStyle(),
-                                  ),
-                                  textInputType: TextInputType.number,
-                                  enabled: controller.isDiscount.value);
-                            }),
+                            Obx(() => textNumField(controller.productDiscount,
+                                textAlign: TextAlign.end,
+                                icon: Text(
+                                  "%",
+                                  style: MediumHeaderStyle(),
+                                ),
+                                textInputType: TextInputType.number,
+                                enabled: controller.isDiscount.value))
                           ])),
                     ),
                   ),
@@ -225,7 +224,10 @@ class NewProductPage extends StatelessWidget {
                                   padding:
                                       EdgeInsets.symmetric(horizontal: 50.w),
                                   child: textField(controller.productMaterials,
-                                      maxLines: 4))))),
+                                      maxLines: 4,
+                                      errorText: controller.errorText(
+                                          controller.productMaterials.text,
+                                          "Materials")))))),
                   StaggeredGridTile.count(
                       crossAxisCellCount: 2,
                       mainAxisCellCount: 1,
@@ -239,11 +241,8 @@ class NewProductPage extends StatelessWidget {
                             width: 300.w,
                             height: 100.h,
                             containerColor: AppColors.secondary,
-                            onTap: () async {
-                              final httpsReference = FirebaseStorage.instance
-                                  .refFromURL(
-                                      "https://storage.googleapis.com/storage/v1/b/navbar-e51ee.appspot.com/o/img%2Fofficecouch%2Fofficecouch0.png");
-                              print(await httpsReference.getDownloadURL());
+                            onTap: () {
+                              print(p.extension(controller.model.string));
                             },
                             widget: Text(
                               "Discard",
@@ -255,18 +254,12 @@ class NewProductPage extends StatelessWidget {
                           ),
                           Obx(() {
                             return Button(
-                                containerColor: controller.isColorChanged.isTrue
-                                    ? controller.pickerColor.value
-                                    : AppColors.primary,
-                                onTap: () {
-                                  controller.uploadToFirebase();
-                                },
+                                containerColor: controller.pickerColor.value,
+                                onTap: controller.onSubmit,
                                 width: 300.w,
                                 height: 100.h,
-                                widget: Text(
-                                  "Add Product",
-                                  style: MediumHeaderStyle(color: Colors.white),
-                                ));
+                                widget:
+                                    Obx(() => controller.uploadButtonInfo()));
                           }),
                         ],
                       ))
@@ -275,9 +268,7 @@ class NewProductPage extends StatelessWidget {
             )
           ]),
         ),
-        customAppBar(
-          text: "New Product",
-        )
+        customAppBar(text: "New Product", backButtonOnTap: backToProduct)
       ],
     );
   }
@@ -308,7 +299,7 @@ class NewProductPage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            height: 30.h,
+            height: 10.h,
           ),
           Text(
             "Product Name",
@@ -318,7 +309,10 @@ class NewProductPage extends StatelessWidget {
           SizedBox(
             height: 20.h,
           ),
-          textField(controller.productName, hint: "Product Name"),
+          textField(controller.productName,
+              hint: "Product Name",
+              errorText: controller.errorText(
+                  controller.productName.text, "Product Name")),
           SizedBox(
             height: 30.h,
           ),
@@ -333,9 +327,11 @@ class NewProductPage extends StatelessWidget {
           textField(controller.productDesc,
               hint: "Product Description",
               textInputType: TextInputType.multiline,
-              maxLines: 3),
+              maxLines: 3,
+              errorText: controller.errorText(
+                  controller.productDesc.text, "Product Description")),
           SizedBox(
-            height: 30.h,
+            height: 15.h,
           ),
           Text(
             "Product Details",
@@ -343,12 +339,12 @@ class NewProductPage extends StatelessWidget {
                 MediumHeaderStyle(fontSize: 30.sp, color: AppColors.secondary),
           ),
           SizedBox(
-            height: 20.h,
+            height: 10.h,
           ),
           textField(controller.productDetails,
               hint: "Product Details",
               textInputType: TextInputType.multiline,
-              maxLines: 5),
+              maxLines: 4),
         ],
       ),
     );
@@ -393,7 +389,7 @@ class NewProductPage extends StatelessWidget {
                   ),
                   controller.isModelUploaded.isTrue
                       ? Text(
-                          "${basename(controller.model.value.path)}",
+                          "${p.basename(controller.model.value.path)}",
                           style: MediumHeaderStyle(
                               fontSize: 25.sp,
                               color: AppColors.darken(
@@ -598,39 +594,6 @@ class NewProductPage extends StatelessWidget {
             },
           );
         }),
-      ],
-    );
-  }
-
-  Widget getContainer({String? title, Widget? widget}) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        title != null
-            ? Text(
-                " " + title,
-                style: MediumHeaderStyle(
-                    fontSize: 35.sp, color: AppColors.secondary),
-              )
-            : SizedBox(),
-        SizedBox(
-          height: 20.sp,
-        ),
-        Expanded(
-          child: Container(
-            alignment: Alignment.center,
-            clipBehavior: Clip.hardEdge,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20.r),
-              border: Border.all(
-                  color: AppColors.lighten(AppColors.secondary, 0.65),
-                  width: 3.sp),
-              color: Colors.white.withOpacity(0.6),
-            ),
-            child: widget,
-          ),
-        ),
       ],
     );
   }

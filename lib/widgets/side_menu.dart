@@ -3,17 +3,21 @@ import 'package:collectar_admin/mainscreen/mainscreen_controller.dart';
 import 'package:collectar_admin/theme/appcolors.dart';
 import 'package:collectar_admin/theme/fonts.dart';
 import 'package:collectar_admin/widgets/side_menu_controller.dart';
+
+import 'package:firebase_dart/firebase_dart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:ionicons/ionicons.dart';
+
+import '../database/boxes.dart';
 
 class SideMenu extends StatelessWidget {
   const SideMenu({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // final controller = Get.find<SideMenuController>();
     final mainscreencontroller = Get.find<MainScreenController>();
 
     return Container(
@@ -75,7 +79,7 @@ class SideMenu extends StatelessWidget {
                         child: InkWell(
                           onTap: () {
                             mainscreencontroller.pageControl.value = false;
-                            controller.OnTap(index);
+                            controller.onTap(index);
                             //TODO: Add condition for just item controller
                             if (index == 1) {
                               Get.delete<ItemController>();
@@ -116,6 +120,24 @@ class SideMenu extends StatelessWidget {
                       )));
             }),
           ),
+          SizedBox(
+            height: 700.h,
+          ),
+          InkWell(
+            onTap: () {
+              FirebaseAuth.instance.signOut();
+              Boxes.getUser().clear();
+            },
+            child: Row(
+              children: [
+                Icon(Ionicons.exit),
+                SizedBox(
+                  width: 20.w,
+                ),
+                Text('Log Out')
+              ],
+            ),
+          )
         ]),
       ),
     );

@@ -26,27 +26,15 @@ class MainScreenController extends GetxController {
     switch (controller.selectedIndex.value) {
       case 0:
         {
-          return HomePage();
+          return ProductPage();
         }
       case 1:
         {
-          return ProductPage();
-        }
-      case 2:
-        {
           return OrdersPage();
         }
-      case 3:
+      default:
         {
-          return HomePage();
-        }
-      case 4:
-        {
-          return HomePage();
-        }
-      case 5:
-        {
-          return HomePage();
+          return ProductPage();
         }
     }
   }

@@ -208,7 +208,7 @@ class ItemPage extends StatelessWidget {
           ],
         ),
       ),
-      Positioned(child: customAppBar()),
+      Positioned(child: customAppBar(backButtonOnTap: backToProduct)),
     ]);
   }
 }

@@ -11,6 +11,9 @@ export 'productcard.dart';
 export 'texteditor.dart';
 export 'imageslistview.dart';
 export 'categorydropdown.dart';
+export 'authtextfield.dart';
+export 'customcontainer.dart';
+export 'getdeliverydetails.dart';
 
 class Button extends StatelessWidget {
   Button(
@@ -38,7 +41,7 @@ class Button extends StatelessWidget {
         width: width,
         decoration: BoxDecoration(
             color: containerColor ?? AppColors.primary,
-            borderRadius: BorderRadius.circular(20.r)),
+            borderRadius: BorderRadius.circular(15.r)),
         child: Padding(
             padding: EdgeInsets.symmetric(vertical: 10.h), child: widget),
       ),

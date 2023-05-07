@@ -4,18 +4,14 @@ import 'package:get/get.dart';
 import 'package:ionicons/ionicons.dart';
 
 class SideMenuController extends GetxController {
-  List tabs = ["Home", "Products", "Orders", "Customer", "Help", "Settings"];
+  List tabs = ["Products", "Orders"];
 
   List<IoniconsData> icons = [
-    Ionicons.home,
     Ionicons.bag_handle,
     Ionicons.cart,
-    Ionicons.person,
-    Ionicons.help_buoy,
-    Ionicons.settings
   ];
   RxInt selectedIndex = 0.obs;
-  OnTap(int index) {
+  onTap(int index) {
     selectedIndex.value = index;
     update();
   }

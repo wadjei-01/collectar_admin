@@ -17,13 +17,22 @@ class FirestoreDB {
     return products;
   }
 
-  static Stream<List<Document>> orderStream() {
+  static Stream<List<Document>> orderStream(
+      {String? orderBy, bool? descending}) {
     final orders = fireDB
         .collection('orders')
-        .orderBy('date', descending: true)
+        .orderBy(orderBy ?? 'date', descending: descending ?? true)
         .get()
         .asStream();
     return orders;
+  }
+
+  static Future<Document> fetchUserData(String id) async {
+    final query =
+        await fireDB.collection('users').where('id', isEqualTo: id).get();
+    final user = query[0];
+
+    return user;
   }
 
   static update(String id, Product product) {

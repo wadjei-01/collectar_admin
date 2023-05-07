@@ -10,7 +10,7 @@ import 'package:ionicons/ionicons.dart';
 
 import '../item/item_controller.dart';
 
-Container customAppBar({String? text}) {
+Container customAppBar({String? text, Function()? backButtonOnTap}) {
   return Container(
       padding: EdgeInsets.only(left: 30.w),
       height: 150.h,
@@ -24,7 +24,7 @@ Container customAppBar({String? text}) {
             IconButton(
               icon: Icon(Icons.chevron_left_rounded),
               iconSize: 70.r,
-              onPressed: backToProduct,
+              onPressed: backButtonOnTap,
             ),
             text != null
                 ? Text(
@@ -42,7 +42,19 @@ backToProduct() async {
   final main = Get.find<MainScreenController>();
   final side = Get.find<SideMenuController>();
   main.pageControl.value = false;
-  side.OnTap(1);
+  side.onTap(0);
+  //TODO: Add condition for just item controller
+  Get.delete<ItemController>();
+  Get.delete<NewProductController>();
+  await Get.put(ItemController());
+  await Get.put(NewProductController());
+}
+
+backToOrders() async {
+  final main = Get.find<MainScreenController>();
+  final side = Get.find<SideMenuController>();
+  main.pageControl.value = false;
+  side.onTap(1);
   //TODO: Add condition for just item controller
   Get.delete<ItemController>();
   Get.delete<NewProductController>();
