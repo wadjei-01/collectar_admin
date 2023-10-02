@@ -20,3 +20,8 @@ To install and run the collectAR Admin Desktop Application, follow these steps:
 3. Configure your Firebase project and obtain the necessary API keys and credentials.
 4. Navigate to the project directory and install the required dependencies by running the command: _flutter pub get_.
 5. Launch the collectAR Admin application by running the command: _flutter run_.
+
+
+# Demo
+https://github.com/wadjei-01/collectar_admin/assets/101362617/6ca96ce1-e1b4-4644-9785-333e8cdf5490
+
